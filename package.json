@@ -14,7 +14,12 @@
         "coc.nvim",
         "css-modules"
     ],
-    "files": ["lib/*"],
+    "files": [
+        "lib/*"
+    ],
+    "engines": {
+        "coc": ">= 0.0.70"
+    },
     "author": "antonk52",
     "license": "MIT",
     "devDependencies": {
