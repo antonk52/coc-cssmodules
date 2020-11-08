@@ -21,6 +21,10 @@
         "coc": ">= 0.0.70"
     },
     "author": "antonk52",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/antonk52/coc-cssmodules.git"
+    },
     "license": "MIT",
     "devDependencies": {
         "@chemzqm/tsconfig": "0.0.3",
