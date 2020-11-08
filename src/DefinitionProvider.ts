@@ -60,7 +60,7 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
             return null;
         }
 
-        const targetPosition = getPosition(
+        const targetPosition = await getPosition(
             importPath,
             field,
             this._camelCaseConfig,

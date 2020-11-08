@@ -4,6 +4,9 @@ import os from 'os';
 import fs from 'fs';
 import _camelCase from 'lodash.camelcase';
 
+import postcss from 'postcss';
+import type {Node} from 'postcss';
+
 /**
  * TODO find better way to get a file path not starting with `file:///`
  */
@@ -74,58 +77,20 @@ export function isImportLineMatch(
     );
 }
 
-export function getPosition(
+/**
+ * Finds the position of the className in filePath
+ */
+export async function getPosition(
     filePath: string,
     className: string,
     camelCaseConfig: CamelCaseValues,
-): Position {
-    const content = fs.readFileSync(filePath, {encoding: 'utf8'});
-    const lines = content.split(os.EOL);
+): Promise<Position> {
+    const classDict = await filePathToClassnameDict(filePath);
+    const target = classDict[`.${className}`];
 
-    let lineNumber = -1;
-    let character = -1;
-    const keyWord =
-        camelCaseConfig !== true
-            ? // is false or 'dashes'
-              `.${className}`
-            : className;
-    const classTransformer = getTransformer(camelCaseConfig);
-
-    for (let i = 0; i < lines.length; i++) {
-        const originalLine = lines[i];
-        /**
-         * The only way to guarantee that a position will be returned for a camelized class
-         * is to check after camelizing the source line.
-         * Doing the opposite -- uncamelizing the used classname -- would not always give
-         * correct result, as camelization is lossy.
-         * i.e. `.button--disabled`, `.button-disabled` both give same
-         * final class: `css.buttonDisabled`, and going back from this to that is not possble.
-         *
-         * But this has a drawback - camelization of a line may change the final
-         * positions of classes. But as of now, I don't see a better way, and getting this
-         * working is more important, also putting this functionality out there would help
-         * get more eyeballs and hopefully a better way.
-         */
-        const line = !classTransformer
-            ? originalLine
-            : classTransformer(originalLine);
-        character = line.indexOf(keyWord);
-
-        if (character === -1 && !!classTransformer) {
-            // if camelized match fails, and transformer is there
-            // try matching the un-camelized classnames too!
-            character = originalLine.indexOf(keyWord);
-        }
-
-        if (character !== -1) {
-            lineNumber = i;
-            break;
-        }
-    }
-
-    return lineNumber === -1
-        ? null
-        : Position.create(lineNumber, character + 1);
+    return target
+        ? Position.create(target.loc.line - 1, target.loc.column)
+        : null;
 }
 
 export function getWords(line: string, position: Position): string {
@@ -144,24 +109,140 @@ export function getWords(line: string, position: Position): string {
     return match[1];
 }
 
-function uniq(arr: string[]): string[] {
-    return Array.from(new Set(arr));
+type Classname = {
+    name: string,
+    loc: {
+        line: number,
+        column: number,
+    }
 }
 
-export function getAllClassNames(filePath: string, keyword: string): string[] {
+const log = (...args: any[]) => {
+    const timestamp = new Date().toLocaleTimeString('en-GB', {hour12: false});
+    const msg = args.map(
+        x => typeof x === 'object' ? '\n' + JSON.stringify(x, null, 2) : x
+    ).join('\n\t');
+
+    fs.writeFileSync(
+        '/tmp/log-cssmodules',
+        `\n[${timestamp}] ${msg}`,
+    );
+}
+
+const sanitizeSelector = (selector: string) => selector
+    .replace(/\\n|\\t/g, '')
+    .replace(/\s+/, ' ')
+    .trim();
+async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
+    const content = fs.readFileSync(filepath, {encoding: 'utf8'});
+    const proc = postcss();
+    const ast = await proc.process(content);
+    // TODO: root.walkRules and for each rule gather info about parents
+    const dict: Record<string, Classname> = {};
+
+    const visitedNodes = new Map<Node, {selectors: string[]}>([]);
+    const stack = [...ast.root.nodes];
+
+    while (stack.length) {
+        const node = stack.shift();
+        if (node.type !== 'rule') continue;
+        log('---------', {selector: node.selector, isSubParent: node.parent === ast.root});
+        const selectors = node.selector
+            .split(',')
+            .map(sanitizeSelector)
+
+        selectors.forEach(sels => {
+            const classNameRe = /\.\w*([-0-9a-z_])*/gi;
+            if (node.parent === ast.root) {
+                const match = sels.match(classNameRe);
+                match?.forEach(name => {
+                    if (name in dict) return;
+
+                    const {column, line} = node.source.start;
+
+                    const diff = node.selector.indexOf(name);
+                    const diffStr = node.selector.slice(0, diff)
+                    const lines = diffStr.split(os.EOL);
+                    const lastLine = lines[lines.length - 1];
+
+                    dict[name] = {
+                        name,
+                        loc: {
+                            column: column + lastLine.length,
+                            line: line + lines.length - 1,
+                        }
+                    }
+                });
+
+                visitedNodes.set(node, {selectors});
+            } else {
+                const knownParent = visitedNodes.get(node.parent);
+                if (!knownParent) {
+                    log('WE ARE IN TROUBLE');
+                    return;
+                }
+
+                const finishedSelectors: string[] = [].concat(
+                    ...knownParent.selectors.map(
+                        ps => selectors.map(
+                            /**
+                             * No need to replace for children separated by spaces
+                             *
+                             * .parent {
+                             *      color: red;
+                             *
+                             *      & .child {
+                             *      ^^^^^^^^ no need to do the replace here,
+                             *               since no new classnames are created
+                             *          color: pink;
+                             *      }
+                             * }
+                             */
+                            s => /&[a-z0-1-_]/i ? s.replace('&', ps) : s
+                        )
+                    )
+                );
+
+                log({finishedSelectors})
+                const finishedSelectorsAndClassNames = finishedSelectors
+                    .map(finsihedSel => finsihedSel.match(classNameRe))
+
+                log({finishedSelectorsAndClassNames})
+
+                finishedSelectorsAndClassNames.forEach(fscl => fscl?.forEach(classname => {
+                    if (classname in dict) return;
+
+                    const {column, line} = node.source.start;
+
+                    // TODO: refine location to specific line by the classname's last characteds
+                    dict[classname] = {
+                        name: classname,
+                        loc: {
+                            column: column + 0,
+                            line: line,
+                        },
+                    };
+                }));
+
+                visitedNodes.set(node, {selectors: finishedSelectors});
+            }
+        });
+
+        stack.push(...node.nodes);
+    }
+
+    return dict;
+}
+
+/**
+ * Get all classnames from the file contents
+ */
+export async function getAllClassNames(filePath: string, keyword: string): Promise<string[]> {
     const content = fs.readFileSync(filePath, {encoding: 'utf8'});
-    const lines = content.match(/.*[,{]/g);
-    if (lines === null) {
-        return [];
-    }
+    const classes = await filePathToClassnameDict(content);
+    const classList = Object.keys(classes);
 
-    const classNames = lines.join(' ').match(/\.[_a-z0-9\-]+/gi);
-    if (classNames === null) {
-        return [];
-    }
-
-    const uniqNames = uniq(classNames).map(item => item.slice(1));
     return keyword !== ''
-        ? uniqNames.filter(item => item.includes(keyword))
-        : uniqNames;
+        ? classList.filter(item => item.includes(keyword))
+        : classList;
 }

@@ -22,8 +22,8 @@
     },
     "author": "antonk52",
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/antonk52/coc-cssmodules.git"
+        "type": "git",
+        "url": "https://github.com/antonk52/coc-cssmodules.git"
     },
     "license": "MIT",
     "devDependencies": {
@@ -39,5 +39,8 @@
         "vscode-uri": "^2.1.1",
         "webpack": "^4.42.0",
         "webpack-cli": "^3.3.11"
+    },
+    "dependencies": {
+        "postcss": "^8.1.6"
     }
 }
