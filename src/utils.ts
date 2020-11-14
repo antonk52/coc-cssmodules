@@ -4,7 +4,7 @@ import os from 'os';
 import fs from 'fs';
 import _camelCase from 'lodash.camelcase';
 
-import postcss from 'postcss';
+import {parse as postcssParse} from 'postcss';
 import type {Node} from 'postcss';
 
 /**
@@ -117,7 +117,7 @@ type Classname = {
     }
 }
 
-const log = (...args: any[]) => {
+export const log = (...args: any[]) => {
     const timestamp = new Date().toLocaleTimeString('en-GB', {hour12: false});
     const msg = args.map(
         x => typeof x === 'object' ? '\n' + JSON.stringify(x, null, 2) : x
@@ -133,27 +133,27 @@ const sanitizeSelector = (selector: string) => selector
     .replace(/\\n|\\t/g, '')
     .replace(/\s+/, ' ')
     .trim();
-async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
+
+export async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
-    const proc = postcss();
-    const ast = await proc.process(content);
+    const root = postcssParse(content, {map: false, from: filepath});
     // TODO: root.walkRules and for each rule gather info about parents
     const dict: Record<string, Classname> = {};
 
     const visitedNodes = new Map<Node, {selectors: string[]}>([]);
-    const stack = [...ast.root.nodes];
+    const stack = [...root.nodes];
 
     while (stack.length) {
         const node = stack.shift();
         if (node.type !== 'rule') continue;
-        log('---------', {selector: node.selector, isSubParent: node.parent === ast.root});
+        log('---------', {selector: node.selector, isSubParent: node.parent === root});
         const selectors = node.selector
             .split(',')
             .map(sanitizeSelector)
 
         selectors.forEach(sels => {
             const classNameRe = /\.\w*([-0-9a-z_])*/gi;
-            if (node.parent === ast.root) {
+            if (node.parent === root) {
                 const match = sels.match(classNameRe);
                 match?.forEach(name => {
                     if (name in dict) return;
@@ -238,8 +238,7 @@ async function filePathToClassnameDict(filepath: string): Promise<Record<string,
  * Get all classnames from the file contents
  */
 export async function getAllClassNames(filePath: string, keyword: string): Promise<string[]> {
-    const content = fs.readFileSync(filePath, {encoding: 'utf8'});
-    const classes = await filePathToClassnameDict(content);
+    const classes = await filePathToClassnameDict(filePath);
     const classList = Object.keys(classes);
 
     return keyword !== ''
