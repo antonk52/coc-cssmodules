@@ -32,7 +32,8 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
         const {nvim} = workspace;
 
         const currentDir = getCurrentDirFromDocument(document);
-        const currentLine = await nvim.eval('getline(".")');
+        const currentLine = await nvim.getLine();
+
         if (typeof currentLine !== 'string') {
             return null;
         }
