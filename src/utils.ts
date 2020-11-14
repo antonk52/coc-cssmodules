@@ -16,24 +16,25 @@ export function getCurrentDirFromDocument(document: TextDocument) {
 
 export type CamelCaseValues = false | true | 'dashes';
 
-export function genImportRegExp(key: string): RegExp {
-    const file = '(.+\\.\\S{1,2}ss)';
+export function genImportRegExp(importName: string): RegExp {
+    const file = '(.+\\.(\\S{1,2}ss|styl(us)?))';
     const fromOrRequire = '(?:from\\s+|=\\s+require(?:<any>)?\\()';
     const requireEndOptional = '\\)?';
-    const pattern = `${key}\\s+${fromOrRequire}["']${file}["']${requireEndOptional}`;
+    const pattern = `${importName}\\s+${fromOrRequire}["']${file}["']${requireEndOptional}`;
+
     return new RegExp(pattern);
 }
 
 export function findImportPath(
-    text: string,
+    fileContent: string,
     key: string,
-    parentPath: string,
+    directoryPath: string,
 ): string {
     const re = genImportRegExp(key);
-    const results = re.exec(text);
+    const results = re.exec(fileContent);
 
     if (!!results && results.length > 0) {
-        return path.resolve(parentPath, results[1]);
+        return path.resolve(directoryPath, results[1]);
     } else {
         return '';
     }
@@ -137,6 +138,28 @@ type LazyLoadPostcssParser = () => Parser;
 
 const PostcssInst = postcss([]);
 
+/**
+ * input `'./path/to/styles.css'`
+ *
+ * output
+ *
+ * ```
+ * {
+ *     '.foo': {
+ *         loc: {
+ *             line: 10,
+ *             column: 5,
+ *         }
+ *     },
+ *     '.bar': {
+ *         loc: {
+ *             line: 22,
+ *             column: 1,
+ *         }
+ *     }
+ * }
+ * ```
+ */
 export async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
     const {ext} = path.parse(filepath);
@@ -171,7 +194,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
     while (stack.length) {
         const node = stack.shift();
         if (node.type !== 'rule') continue;
-        log('---------', {selector: node.selector, isSubParent: node.parent === root});
+
         const selectors = node.selector
             .split(',')
             .map(sanitizeSelector)
@@ -258,7 +281,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
  */
 export async function getAllClassNames(filePath: string, keyword: string): Promise<string[]> {
     const classes = await filePathToClassnameDict(filePath);
-    const classList = Object.keys(classes);
+    const classList = Object.keys(classes).map(x => x.slice(1));
 
     return keyword !== ''
         ? classList.filter(item => item.includes(keyword))
