@@ -197,4 +197,44 @@ describe('filePathToClassnameDict', () => {
 
         expect(result).toEqual(expected)
     });
+
+    it('gets a dictionory of nested classnames from scss files', async () => {
+        const filepath = path.join(__dirname, 'styles', 'nested.scss');
+        const result = await filePathToClassnameDict(filepath);
+        const expected = {
+            ".accordion": {
+                "loc": {
+                    "column": 1,
+                    "line": 69,
+                },
+            },
+            ".accordion__copy": {
+                "loc": {
+                    "column": 5,
+                    "line": 76,
+                },
+            },
+            ".accordion__copy--open": {
+                "loc": {
+                    "column": 9,
+                    "line": 84,
+                },
+            },
+            ".alert": {
+                "loc": {
+                    "column": 1,
+                    "line": 58,
+                },
+            },
+            ".pulse": {
+                "loc": {
+                    "column": 1,
+                    "line": 46,
+                },
+            },
+
+        };
+
+        expect(result).toEqual(expected)
+    });
 });
