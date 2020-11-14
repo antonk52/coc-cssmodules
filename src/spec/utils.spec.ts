@@ -237,4 +237,44 @@ describe('filePathToClassnameDict', () => {
 
         expect(result).toEqual(expected)
     });
+
+    it('gets a dictionory of nested classnames from sass files', async () => {
+        const filepath = path.join(__dirname, 'styles', 'nested.sass');
+        const result = await filePathToClassnameDict(filepath);
+        const expected = {
+            ".accordion": {
+                "loc": {
+                    "column": 1,
+                    "line": 55,
+                },
+            },
+            ".accordion__copy": {
+                "loc": {
+                    "column": 5,
+                    "line": 62,
+                },
+            },
+            ".accordion__copy--open": {
+                "loc": {
+                    "column": 9,
+                    "line": 70,
+                },
+            },
+            ".alert": {
+                "loc": {
+                    "column": 1,
+                    "line": 48,
+                },
+            },
+            ".pulse": {
+                "loc": {
+                    "column": 1,
+                    "line": 35,
+                },
+            },
+
+        };
+
+        expect(result).toEqual(expected)
+    });
 });

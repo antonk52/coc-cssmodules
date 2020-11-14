@@ -144,6 +144,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
     const parsers = {
         '.less': () => require('postcss-less'),
         '.scss': () => require('postcss-scss'),
+        '.sass': () => require('postcss-sass'),
     };
 
     const getParser = parsers[ext] as void | LazyLoadPostcssParser;

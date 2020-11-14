@@ -45,6 +45,7 @@
     "dependencies": {
         "postcss": "^8.1.6",
         "postcss-less": "^4.0.0",
+        "postcss-sass": "^0.4.4",
         "postcss-scss": "^3.0.4"
     }
 }
