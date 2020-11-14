@@ -4,8 +4,8 @@ import os from 'os';
 import fs from 'fs';
 import _camelCase from 'lodash.camelcase';
 
-import {parse as postcssParse} from 'postcss';
-import type {Node} from 'postcss';
+import postcss from 'postcss';
+import type {Node, Parser, ProcessOptions} from 'postcss';
 
 /**
  * TODO find better way to get a file path not starting with `file:///`
@@ -110,12 +110,11 @@ export function getWords(line: string, position: Position): string {
 }
 
 type Classname = {
-    name: string,
     loc: {
         line: number,
         column: number,
-    }
-}
+    },
+};
 
 export const log = (...args: any[]) => {
     const timestamp = new Date().toLocaleTimeString('en-GB', {hour12: false});
@@ -134,14 +133,38 @@ const sanitizeSelector = (selector: string) => selector
     .replace(/\s+/, ' ')
     .trim();
 
+type LazyLoadPostcssParser = () => Parser;
+
+const PostcssInst = postcss([]);
+
 export async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
-    const root = postcssParse(content, {map: false, from: filepath});
+    const {ext} = path.parse(filepath);
+
+    const parsers = {
+        '.less': () => require('postcss-less'),
+    };
+
+    const getParser = parsers[ext] as void | LazyLoadPostcssParser;
+
+    /**
+     * Postcss does not expose this option though typescript types
+     * This is why we are doing this naughty thingy
+     */
+    const hiddenOption = {hideNothingWarning: true} as {};
+    const postcssOptions: ProcessOptions = {
+        map: false,
+        from: filepath,
+        ...hiddenOption,
+        ...(getParser ? {parser: getParser()} : {})
+    };
+
+    const ast = await PostcssInst.process(content, postcssOptions);
     // TODO: root.walkRules and for each rule gather info about parents
     const dict: Record<string, Classname> = {};
 
     const visitedNodes = new Map<Node, {selectors: string[]}>([]);
-    const stack = [...root.nodes];
+    const stack = [...ast.root.nodes];
 
     while (stack.length) {
         const node = stack.shift();
@@ -152,8 +175,8 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
             .map(sanitizeSelector)
 
         selectors.forEach(sels => {
-            const classNameRe = /\.\w*([-0-9a-z_])*/gi;
-            if (node.parent === root) {
+            const classNameRe = /\.([-0-9a-z_\p{Emoji_Presentation}])+/gui;
+            if (node.parent === ast.root) {
                 const match = sels.match(classNameRe);
                 match?.forEach(name => {
                     if (name in dict) return;
@@ -166,7 +189,6 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
                     const lastLine = lines[lines.length - 1];
 
                     dict[name] = {
-                        name,
                         loc: {
                             column: column + lastLine.length,
                             line: line + lines.length - 1,
@@ -178,7 +200,6 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
             } else {
                 const knownParent = visitedNodes.get(node.parent);
                 if (!knownParent) {
-                    log('WE ARE IN TROUBLE');
                     return;
                 }
 
@@ -203,11 +224,8 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
                     )
                 );
 
-                log({finishedSelectors})
                 const finishedSelectorsAndClassNames = finishedSelectors
                     .map(finsihedSel => finsihedSel.match(classNameRe))
-
-                log({finishedSelectorsAndClassNames})
 
                 finishedSelectorsAndClassNames.forEach(fscl => fscl?.forEach(classname => {
                     if (classname in dict) return;
@@ -216,9 +234,8 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
 
                     // TODO: refine location to specific line by the classname's last characteds
                     dict[classname] = {
-                        name: classname,
                         loc: {
-                            column: column + 0,
+                            column: column,
                             line: line,
                         },
                     };

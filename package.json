@@ -43,6 +43,7 @@
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
-        "postcss": "^8.1.6"
+        "postcss": "^8.1.6",
+        "postcss-less": "^4.0.0"
     }
 }
