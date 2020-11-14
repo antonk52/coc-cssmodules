@@ -1,0 +1,28 @@
+.single {
+    color: red;
+}
+
+.parent {
+    & .child {
+        color: red;
+    }
+
+    &--mod {
+        color: green;
+
+        &--addon {
+            color: lightgreen;
+        }
+    }
+
+    &[disabled] {
+        color: pink;
+    }
+
+    &:active {
+        color: yellow;
+    }
+    &--aa:active, &--bb:active {
+        color: rebeccapurple;
+    }
+}
