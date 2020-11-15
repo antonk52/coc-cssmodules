@@ -40,20 +40,28 @@ export function findImportPath(
     }
 }
 
-export function dashesCamelCase(str: string): string {
-    return str.replace(/-(\w)/g, (_, firstLetter) => firstLetter.toUpperCase());
-}
-
-type StringTransformer = (str: string) => string;
-
+export type StringTransformer = (str: string) => string;
 export function getTransformer(
     camelCaseConfig: CamelCaseValues,
 ): StringTransformer {
     switch (camelCaseConfig) {
         case true:
-            return _camelCase;
+            /**
+             * _camelCase will remove the dots in the string though if the
+             * classname starts with a dot we want to preserve it
+             */
+            return input => `${input.charAt(0) === '.' ? '.' : ''}${_camelCase(input)}`;
         case 'dashes':
-            return dashesCamelCase;
+            /**
+             * only replaces `-` that are followed by letters
+             *
+             * `.foo__bar--baz` -> `.foo__barBaz`
+             */
+            return (str) =>
+                str.replace(
+                    /-+(\w)/g,
+                    (_, firstLetter) => firstLetter.toUpperCase()
+                );
         default:
             return x => x;
     }
@@ -86,7 +94,7 @@ export async function getPosition(
     className: string,
     camelCaseConfig: CamelCaseValues,
 ): Promise<Position | null> {
-    const classDict = await filePathToClassnameDict(filePath);
+    const classDict = await filePathToClassnameDict(filePath, getTransformer(camelCaseConfig));
     const target = classDict[`.${className}`];
 
     return target
@@ -160,7 +168,10 @@ const PostcssInst = postcss([]);
  * }
  * ```
  */
-export async function filePathToClassnameDict(filepath: string): Promise<Record<string, Classname>> {
+export async function filePathToClassnameDict(
+    filepath: string,
+    classnameTransformer: StringTransformer
+): Promise<Record<string, Classname>> {
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
     const {ext} = path.parse(filepath);
 
@@ -219,7 +230,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
                     const lines = diffStr.split(os.EOL);
                     const lastLine = lines[lines.length - 1];
 
-                    dict[name] = {
+                    dict[classnameTransformer(name)] = {
                         loc: {
                             column: column + lastLine.length,
                             line: line + lines.length - 1,
@@ -268,7 +279,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
                     const line = node.source.start?.line || 0;
 
                     // TODO: refine location to specific line by the classname's last characteds
-                    dict[classname] = {
+                    dict[classnameTransformer(classname)] = {
                         loc: {
                             column: column,
                             line: line,
@@ -289,8 +300,12 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
 /**
  * Get all classnames from the file contents
  */
-export async function getAllClassNames(filePath: string, keyword: string): Promise<string[]> {
-    const classes = await filePathToClassnameDict(filePath);
+export async function getAllClassNames(
+    filePath: string,
+    keyword: string,
+    classnameTransformer: StringTransformer,
+): Promise<string[]> {
+    const classes = await filePathToClassnameDict(filePath, classnameTransformer);
     const classList = Object.keys(classes).map(x => x.slice(1));
 
     return keyword !== ''

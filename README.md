@@ -24,6 +24,15 @@ If you write kebab-case classes in css files, but want to get camelCase complete
 }
 ```
 
+### Options and transoformation
+
+You can set the `cssmodules.camelCase` option to `true`, `"dashes"` or `false`(default).
+
+| Classname in css file | `true`            | `dashes`        | `false`(default) |
+| --------------------- | ----------------- | --------------- | ---------------- |
+| `.button`             | `.button`         | `.button`       | `.button`        |
+| `.btn__icon--mod`     | `.btn__icon--mod` | `.btn__iconMod` | `.btnIconMod`    |
+
 ## Acknowledgments
 
-This plugin is essentially a port of [vscode-css-modules plugin](https://github.com/clinyong/vscode-css-modules).
+This plugin was based on [vscode-css-modules plugin](https://github.com/clinyong/vscode-css-modules).

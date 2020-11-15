@@ -28,7 +28,7 @@
         "title": "cssmodules",
         "properties": {
             "cssmodules.camelCase": {
-                "default": true,
+                "default": false,
                 "description": "Enable tsserver extension",
                 "oneOf": [
                     {
