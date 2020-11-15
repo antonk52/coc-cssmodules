@@ -283,6 +283,7 @@ const fileContent = `
 import React from 'react'
 
 import css from './style.css'
+import cssm from './style.module.css'
 import style from './style.css'
 import styles from './styles.css'
 import lCss from './styles.less'
@@ -304,6 +305,7 @@ describe('findImportPath', () => {
 
     [
         ['css', path.join(dirPath, 'style.css')],
+        ['cssm', path.join(dirPath, 'style.module.css')],
         ['style', path.join(dirPath, 'style.css')],
         ['styles', path.join(dirPath, 'styles.css')],
         ['lCss', path.join(dirPath, 'styles.less')],

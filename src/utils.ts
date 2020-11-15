@@ -17,7 +17,7 @@ export function getCurrentDirFromDocument(document: TextDocument) {
 export type CamelCaseValues = false | true | 'dashes';
 
 export function genImportRegExp(importName: string): RegExp {
-    const file = '(.+\\.(css|scss|sass|styl))';
+    const file = '(.+\\.(styl|sass|scss|less|css))';
     const fromOrRequire = '(?:from\\s+|=\\s+require(?:<any>)?\\()';
     const requireEndOptional = '\\)?';
     const pattern = `${importName}\\s+${fromOrRequire}["']${file}["']${requireEndOptional}`;
@@ -164,6 +164,9 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
     const {ext} = path.parse(filepath);
 
+    /**
+     * only load the parses once they are needed
+     */
     const parsers = {
         '.less': () => require('postcss-less'),
         '.scss': () => require('postcss-scss'),
