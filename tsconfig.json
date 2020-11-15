@@ -2,6 +2,7 @@
     "extends": "./node_modules/@chemzqm/tsconfig/tsconfig.json",
     "compilerOptions": {
         "declaration": false,
+        "strictNullChecks": true,
         "outDir": "lib",
         "target": "es2015",
         "module": "commonjs",

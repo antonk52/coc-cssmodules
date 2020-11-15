@@ -25,11 +25,13 @@ export async function activate(context: ExtensionContext) {
         ),
     );
 
+    const langs = mode.map(x => x.language).filter(Boolean) as string[];
+
     context.subscriptions.push(
         languages.registerCompletionItemProvider(
             'coc-cssmodules',
             'cssmodules',
-            mode.map(x => x.language),
+            langs,
             new CSSModulesCompletionProvider(camelCaseConfig),
             ['.'],
             undefined,

@@ -18,9 +18,9 @@ import {
 } from './utils';
 
 export class CSSModulesDefinitionProvider implements DefinitionProvider {
-    _camelCaseConfig: CamelCaseValues = false;
+    _camelCaseConfig: CamelCaseValues;
 
-    constructor(camelCaseConfig?: CamelCaseValues) {
+    constructor(camelCaseConfig: CamelCaseValues) {
         this._camelCaseConfig = camelCaseConfig;
     }
 
@@ -28,7 +28,7 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
         document: TextDocument,
         position: Position,
         _: CancellationToken,
-    ): Promise<Location> {
+    ): Promise<Location | null> {
         const {nvim} = workspace;
 
         const currentDir = getCurrentDirFromDocument(document);
@@ -39,7 +39,7 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
         }
 
         const matches = genImportRegExp('(\\S+)').exec(currentLine);
-        if (isImportLineMatch(currentLine, matches, position.character)) {
+        if (matches && isImportLineMatch(currentLine, matches, position.character)) {
             const filePath: string = Uri.file(
                 path.resolve(currentDir, matches[2]),
             ).toString();

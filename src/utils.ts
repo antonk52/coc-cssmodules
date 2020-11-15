@@ -55,7 +55,7 @@ export function getTransformer(
         case 'dashes':
             return dashesCamelCase;
         default:
-            return null;
+            return x => x;
     }
 }
 
@@ -85,7 +85,7 @@ export async function getPosition(
     filePath: string,
     className: string,
     camelCaseConfig: CamelCaseValues,
-): Promise<Position> {
+): Promise<Position | null> {
     const classDict = await filePathToClassnameDict(filePath);
     const target = classDict[`.${className}`];
 
@@ -196,7 +196,7 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
 
     while (stack.length) {
         const node = stack.shift();
-        if (node.type !== 'rule') continue;
+        if (node?.type !== 'rule') continue;
 
         const selectors = node.selector
             .split(',')
@@ -209,7 +209,10 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
                 match?.forEach(name => {
                     if (name in dict) return;
 
-                    const {column, line} = node.source.start;
+                    if (node.source === undefined) return;
+
+                    const column = node.source.start?.column || 0;
+                    const line = node.source.start?.line || 0;
 
                     const diff = node.selector.indexOf(name);
                     const diffStr = node.selector.slice(0, diff)
@@ -226,12 +229,14 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
 
                 visitedNodes.set(node, {selectors});
             } else {
+                if (node.parent === undefined) return;
+
                 const knownParent = visitedNodes.get(node.parent);
                 if (!knownParent) {
                     return;
                 }
 
-                const finishedSelectors: string[] = [].concat(
+                const finishedSelectors: string[] = ([] as string[]).concat(
                     ...knownParent.selectors.map(
                         ps => selectors.map(
                             /**
@@ -257,8 +262,10 @@ export async function filePathToClassnameDict(filepath: string): Promise<Record<
 
                 finishedSelectorsAndClassNames.forEach(fscl => fscl?.forEach(classname => {
                     if (classname in dict) return;
+                    if (node.source === undefined) return;
 
-                    const {column, line} = node.source.start;
+                    const column = node.source.start?.column || 0;
+                    const line = node.source.start?.line || 0;
 
                     // TODO: refine location to specific line by the classname's last characteds
                     dict[classname] = {
