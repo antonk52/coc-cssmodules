@@ -4,6 +4,8 @@
 
 <p align="center"><img src="https://user-images.githubusercontent.com/5817809/76164832-0adaf600-6163-11ea-8c8e-548b7aeb1213.gif"></p>
 
+The supported languages are `css`(postcss), `sass` and `scss`. `styl` files are parsed as regular `css`.
+
 ## Installation
 
 ```
@@ -22,6 +24,15 @@ If you write kebab-case classes in css files, but want to get camelCase complete
 }
 ```
 
+### Options and transformation
+
+You can set the `cssmodules.camelCase` option to `true`, `"dashes"` or `false`(default).
+
+| Classname in css file | `true`            | `dashes`        | `false`(default) |
+| --------------------- | ----------------- | --------------- | ---------------- |
+| `.button`             | `.button`         | `.button`       | `.button`        |
+| `.btn__icon--mod`     | `.btn__icon--mod` | `.btn__iconMod` | `.btnIconMod`    |
+
 ## Acknowledgments
 
-This plugin is essentially a port of [vscode-css-modules plugin](https://github.com/clinyong/vscode-css-modules).
+This plugin was based on [vscode-css-modules plugin](https://github.com/clinyong/vscode-css-modules).

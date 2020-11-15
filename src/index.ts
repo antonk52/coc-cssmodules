@@ -16,7 +16,10 @@ export async function activate(context: ExtensionContext) {
     ];
 
     const configuration = workspace.getConfiguration(extName);
-    const camelCaseConfig: CamelCaseValues = configuration.get('camelCase', false);
+    const camelCaseConfig: CamelCaseValues = configuration.get(
+        'camelCase',
+        false,
+    );
 
     context.subscriptions.push(
         languages.registerDefinitionProvider(
@@ -25,15 +28,17 @@ export async function activate(context: ExtensionContext) {
         ),
     );
 
+    const langs = mode.map(x => x.language) as string[];
+
     context.subscriptions.push(
         languages.registerCompletionItemProvider(
             'coc-cssmodules',
             'cssmodules',
-            mode.map(x => x.language),
+            langs,
             new CSSModulesCompletionProvider(camelCaseConfig),
             ['.'],
             undefined,
-            100
+            100,
         ),
     );
 }

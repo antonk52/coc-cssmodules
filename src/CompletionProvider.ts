@@ -4,7 +4,6 @@ import {
     Position,
     CompletionItem,
 } from 'vscode-languageserver-protocol';
-import _camelCase from 'lodash.camelcase';
 import {
     findImportPath,
     getAllClassNames,
@@ -30,18 +29,18 @@ function getWords(line: string, position: Position): string {
 }
 
 export class CSSModulesCompletionProvider implements CompletionItemProvider {
-    _classTransformer = null;
+    _classTransformer: (x: string) => string;
 
-    constructor(camelCaseConfig?: CamelCaseValues) {
+    constructor(camelCaseConfig: CamelCaseValues) {
         this._classTransformer = getTransformer(camelCaseConfig);
     }
 
     async provideCompletionItems(
         document: TextDocument,
         position: Position,
-    ): Promise<CompletionItem[]> {
+    ): Promise<CompletionItem[] | null> {
         const {nvim} = workspace;
-        const currentLine = await nvim.eval('getline(".")');
+        const currentLine = await nvim.getLine();
         if (typeof currentLine !== 'string') return null;
         const currentDir = getCurrentDirFromDocument(document);
 
@@ -61,13 +60,17 @@ export class CSSModulesCompletionProvider implements CompletionItemProvider {
             return [];
         }
 
-        const classNames = getAllClassNames(importPath, field);
+        const classNames = await getAllClassNames(
+            importPath,
+            field,
+            this._classTransformer,
+        ).catch(() => {
+            return [] as string[];
+        });
 
         return classNames.map(_class => {
-            let name = _class;
-            if (!!this._classTransformer) {
-                name = this._classTransformer(name);
-            }
+            const name = this._classTransformer(_class);
+
             return CompletionItem.create(name);
         });
     }
