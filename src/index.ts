@@ -16,7 +16,10 @@ export async function activate(context: ExtensionContext) {
     ];
 
     const configuration = workspace.getConfiguration(extName);
-    const camelCaseConfig: CamelCaseValues = configuration.get('camelCase', false);
+    const camelCaseConfig: CamelCaseValues = configuration.get(
+        'camelCase',
+        false,
+    );
 
     context.subscriptions.push(
         languages.registerDefinitionProvider(
@@ -35,7 +38,7 @@ export async function activate(context: ExtensionContext) {
             new CSSModulesCompletionProvider(camelCaseConfig),
             ['.'],
             undefined,
-            100
+            100,
         ),
     );
 }

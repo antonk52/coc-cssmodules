@@ -1,11 +1,18 @@
-import {filePathToClassnameDict, findImportPath, getTransformer} from '../utils';
+import {
+    filePathToClassnameDict,
+    findImportPath,
+    getTransformer,
+} from '../utils';
 import * as path from 'path';
 
 describe('filePathToClassnameDict', () => {
     describe('CSS', () => {
         it('gets a dictionory of classnames and their location', async () => {
             const filepath = path.join(__dirname, 'styles', 'regular.css');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
                 '.single': {
                     line: 1,
@@ -27,26 +34,29 @@ describe('filePathToClassnameDict', () => {
                     line: 13,
                     column: 1,
                 },
-                ".💩": {
-                    "column": 1,
-                    "line": 17,
+                '.💩': {
+                    column: 1,
+                    line: 17,
                 },
-                ".🔥🚒": {
-                    "column": 1,
-                    "line": 21,
+                '.🔥🚒': {
+                    column: 1,
+                    line: 21,
                 },
-                ".🤢-_-😷": {
-                    "column": 1,
-                    "line": 25,
+                '.🤢-_-😷': {
+                    column: 1,
+                    line: 25,
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
 
         it('gets a dictionory of nested classnames', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.css');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
                 '.single': {
                     line: 1,
@@ -81,13 +91,20 @@ describe('filePathToClassnameDict', () => {
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
 
         // TODO
         it.skip('multiple nested classnames in a single selector', async () => {
-            const filepath = path.join(__dirname, 'styles', 'second-nested-selector.css');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const filepath = path.join(
+                __dirname,
+                'styles',
+                'second-nested-selector.css',
+            );
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
                 '.parent': {
                     line: 1,
@@ -113,204 +130,217 @@ describe('filePathToClassnameDict', () => {
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
     });
 
     describe('LESS', () => {
         it('gets a dictionory of nested classnames from less files', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.less');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
                 '.single': {
                     line: 10,
                     column: 1,
                 },
-                ".button": {
-                    "column": 1,
-                    "line": 14,
+                '.button': {
+                    column: 1,
+                    line: 14,
                 },
-                ".button-cancel": {
-                    "column": 5,
-                    "line": 18,
+                '.button-cancel': {
+                    column: 5,
+                    line: 18,
                 },
-                ".button-custom": {
-                    "column": 5,
-                    "line": 22,
+                '.button-custom': {
+                    column: 5,
+                    line: 22,
                 },
-                ".button-ok": {
-                    "column": 5,
-                    "line": 15,
+                '.button-ok': {
+                    column: 5,
+                    line: 15,
                 },
-                ".class": {
-                    "column": 1,
-                    "line": 52,
+                '.class': {
+                    column: 1,
+                    line: 52,
                 },
-                ".element": {
-                    "column": 5,
-                    "line": 74,
+                '.element': {
+                    column: 5,
+                    line: 74,
                 },
-                ".inner": {
-                    "column": 5,
-                    "line": 98,
+                '.inner': {
+                    column: 5,
+                    line: 98,
                 },
-                ".inside-the-css-guard": {
-                    "column": 5,
-                    "line": 105,
+                '.inside-the-css-guard': {
+                    column: 5,
+                    line: 105,
                 },
-                ".link": {
-                    "column": 1,
-                    "line": 27,
+                '.link': {
+                    column: 1,
+                    line: 27,
                 },
-                ".linkish": {
-                    "column": 5,
-                    "line": 40,
+                '.linkish': {
+                    column: 5,
+                    line: 40,
                 },
-                ".math": {
-                    "column": 1,
-                    "line": 45,
+                '.math': {
+                    column: 1,
+                    line: 45,
                 },
-                ".mixin": {
-                    "column": 1,
-                    "line": 88,
+                '.mixin': {
+                    column: 1,
+                    line: 88,
                 },
-                ".my-optional-style": {
-                    "column": 1,
-                    "line": 104,
+                '.my-optional-style': {
+                    column: 1,
+                    line: 104,
                 },
-                ".myclass": {
-                    "column": 1,
-                    "line": 91,
+                '.myclass': {
+                    column: 1,
+                    line: 91,
                 },
-                ".section": {
-                    "column": 1,
-                    "line": 71,
+                '.section': {
+                    column: 1,
+                    line: 71,
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
     });
 
     describe('SCSS', () => {
         it('gets a dictionory of nested classnames for `false` setting', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.scss');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
-                ".accordion": {
-                    "column": 1,
-                    "line": 69,
+                '.accordion': {
+                    column: 1,
+                    line: 69,
                 },
-                ".accordion__copy": {
-                    "column": 5,
-                    "line": 76,
+                '.accordion__copy': {
+                    column: 5,
+                    line: 76,
                 },
-                ".accordion__copy--open": {
-                    "column": 9,
-                    "line": 84,
+                '.accordion__copy--open': {
+                    column: 9,
+                    line: 84,
                 },
-                ".alert": {
-                    "column": 1,
-                    "line": 58,
+                '.alert': {
+                    column: 1,
+                    line: 58,
                 },
-                ".pulse": {
-                    "column": 1,
-                    "line": 46,
+                '.pulse': {
+                    column: 1,
+                    line: 46,
                 },
-
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
 
         it('gets a dictionory of nested classnames for `true` setting', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.scss');
-            const result = await filePathToClassnameDict(filepath, getTransformer(true));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(true),
+            );
             const expected = {
-                ".accordion": {
-                    "column": 1,
-                    "line": 69,
+                '.accordion': {
+                    column: 1,
+                    line: 69,
                 },
-                ".accordionCopy": {
-                    "column": 5,
-                    "line": 76,
+                '.accordionCopy': {
+                    column: 5,
+                    line: 76,
                 },
-                ".accordionCopyOpen": {
-                    "column": 9,
-                    "line": 84,
+                '.accordionCopyOpen': {
+                    column: 9,
+                    line: 84,
                 },
-                ".alert": {
-                    "column": 1,
-                    "line": 58,
+                '.alert': {
+                    column: 1,
+                    line: 58,
                 },
-                ".pulse": {
-                    "column": 1,
-                    "line": 46,
+                '.pulse': {
+                    column: 1,
+                    line: 46,
                 },
-
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
 
         it('gets a dictionory of nested classnames for `"dashes"` setting', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.scss');
-            const result = await filePathToClassnameDict(filepath, getTransformer("dashes"));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer('dashes'),
+            );
             const expected = {
-                ".accordion": {
-                    "column": 1,
-                    "line": 69,
+                '.accordion': {
+                    column: 1,
+                    line: 69,
                 },
-                ".accordion__copy": {
-                    "column": 5,
-                    "line": 76,
+                '.accordion__copy': {
+                    column: 5,
+                    line: 76,
                 },
-                ".accordion__copyOpen": {
-                    "column": 9,
-                    "line": 84,
+                '.accordion__copyOpen': {
+                    column: 9,
+                    line: 84,
                 },
-                ".alert": {
-                    "column": 1,
-                    "line": 58,
+                '.alert': {
+                    column: 1,
+                    line: 58,
                 },
-                ".pulse": {
-                    "column": 1,
-                    "line": 46,
+                '.pulse': {
+                    column: 1,
+                    line: 46,
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
     });
 
     describe('SASS', () => {
         it('gets a dictionory of nested classnames', async () => {
             const filepath = path.join(__dirname, 'styles', 'nested.sass');
-            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const result = await filePathToClassnameDict(
+                filepath,
+                getTransformer(false),
+            );
             const expected = {
-                ".accordion": {
-                    "column": 1,
-                    "line": 55,
+                '.accordion': {
+                    column: 1,
+                    line: 55,
                 },
-                ".accordion__copy": {
-                    "column": 5,
-                    "line": 62,
+                '.accordion__copy': {
+                    column: 5,
+                    line: 62,
                 },
-                ".accordion__copy--open": {
-                    "column": 9,
-                    "line": 70,
+                '.accordion__copy--open': {
+                    column: 9,
+                    line: 70,
                 },
-                ".alert": {
-                    "column": 1,
-                    "line": 48,
+                '.alert': {
+                    column: 1,
+                    line: 48,
                 },
-                ".pulse": {
-                    "column": 1,
-                    "line": 35,
+                '.pulse': {
+                    column: 1,
+                    line: 35,
                 },
             };
 
-            expect(result).toEqual(expected)
+            expect(result).toEqual(expected);
         });
     });
 });
@@ -356,29 +386,20 @@ describe('findImportPath', () => {
         ['rSCss', path.join(dirPath, './styles.scss')],
         ['rSass', path.join(dirPath, './styles.sass')],
         ['rStyl', path.join(dirPath, './styles.styl')],
-    ].forEach(([importName, expected]) => it(
-        `finds the correct import path for ${importName}`,
-        () => {
-            const result = findImportPath(
-                fileContent,
-                importName,
-                dirPath,
-            );
+    ].forEach(([importName, expected]) =>
+        it(`finds the correct import path for ${importName}`, () => {
+            const result = findImportPath(fileContent, importName, dirPath);
             expect(result).toBe(expected);
-        }
-    ));
+        }),
+    );
 
     it('returns an empty string when there is no import', () => {
         const simpleComponentFile = [
-            'import React from \'react\'',
-            'export () => <h1>hello world</h1>'
+            "import React from 'react'",
+            'export () => <h1>hello world</h1>',
         ].join('\n');
 
-        const result = findImportPath(
-            simpleComponentFile,
-            'css',
-            dirPath,
-        );
+        const result = findImportPath(simpleComponentFile, 'css', dirPath);
         const expected = '';
 
         expect(result).toEqual(expected);

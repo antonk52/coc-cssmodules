@@ -47,17 +47,17 @@ export function getTransformer(
              * _camelCase will remove the dots in the string though if the
              * classname starts with a dot we want to preserve it
              */
-            return input => `${input.charAt(0) === '.' ? '.' : ''}${_camelCase(input)}`;
+            return input =>
+                `${input.charAt(0) === '.' ? '.' : ''}${_camelCase(input)}`;
         case 'dashes':
             /**
              * only replaces `-` that are followed by letters
              *
              * `.foo__bar--baz` -> `.foo__barBaz`
              */
-            return (str) =>
-                str.replace(
-                    /-+(\w)/g,
-                    (_, firstLetter) => firstLetter.toUpperCase()
+            return str =>
+                str.replace(/-+(\w)/g, (_, firstLetter) =>
+                    firstLetter.toUpperCase(),
                 );
         default:
             return x => x;
@@ -91,12 +91,13 @@ export async function getPosition(
     className: string,
     camelCaseConfig: CamelCaseValues,
 ): Promise<Position | null> {
-    const classDict = await filePathToClassnameDict(filePath, getTransformer(camelCaseConfig));
+    const classDict = await filePathToClassnameDict(
+        filePath,
+        getTransformer(camelCaseConfig),
+    );
     const target = classDict[`.${className}`];
 
-    return target
-        ? Position.create(target.line - 1, target.column)
-        : null;
+    return target ? Position.create(target.line - 1, target.column) : null;
 }
 
 export function getWords(line: string, position: Position): string {
@@ -116,26 +117,26 @@ export function getWords(line: string, position: Position): string {
 }
 
 type Classname = {
-    line: number,
-    column: number,
+    line: number;
+    column: number;
 };
 
-export const log = (...args: any[]) => {
+export const log = (...args: unknown[]) => {
     const timestamp = new Date().toLocaleTimeString('en-GB', {hour12: false});
-    const msg = args.map(
-        x => typeof x === 'object' ? '\n' + JSON.stringify(x, null, 2) : x
-    ).join('\n\t');
+    const msg = args
+        .map(x =>
+            typeof x === 'object' ? '\n' + JSON.stringify(x, null, 2) : x,
+        )
+        .join('\n\t');
 
-    fs.writeFileSync(
-        '/tmp/log-cssmodules',
-        `\n[${timestamp}] ${msg}`,
-    );
-}
+    fs.writeFileSync('/tmp/log-cssmodules', `\n[${timestamp}] ${msg}`);
+};
 
-const sanitizeSelector = (selector: string) => selector
-    .replace(/\\n|\\t/g, '')
-    .replace(/\s+/, ' ')
-    .trim();
+const sanitizeSelector = (selector: string) =>
+    selector
+        .replace(/\\n|\\t/g, '')
+        .replace(/\s+/, ' ')
+        .trim();
 
 type LazyLoadPostcssParser = () => Parser;
 
@@ -161,7 +162,7 @@ const PostcssInst = postcss([]);
  */
 export async function filePathToClassnameDict(
     filepath: string,
-    classnameTransformer: StringTransformer
+    classnameTransformer: StringTransformer,
 ): Promise<Record<string, Classname>> {
     const content = fs.readFileSync(filepath, {encoding: 'utf8'});
     const {ext} = path.parse(filepath);
@@ -181,12 +182,12 @@ export async function filePathToClassnameDict(
      * Postcss does not expose this option though typescript types
      * This is why we are doing this naughty thingy
      */
-    const hiddenOption = {hideNothingWarning: true} as {};
+    const hiddenOption = {hideNothingWarning: true} as Record<never, never>;
     const postcssOptions: ProcessOptions = {
         map: false,
         from: filepath,
         ...hiddenOption,
-        ...(getParser ? {parser: getParser()} : {})
+        ...(getParser ? {parser: getParser()} : {}),
     };
 
     const ast = await PostcssInst.process(content, postcssOptions);
@@ -200,12 +201,10 @@ export async function filePathToClassnameDict(
         const node = stack.shift();
         if (node?.type !== 'rule') continue;
 
-        const selectors = node.selector
-            .split(',')
-            .map(sanitizeSelector)
+        const selectors = node.selector.split(',').map(sanitizeSelector);
 
         selectors.forEach(sels => {
-            const classNameRe = /\.([-0-9a-z_\p{Emoji_Presentation}])+/gui;
+            const classNameRe = /\.([-0-9a-z_\p{Emoji_Presentation}])+/giu;
             if (node.parent === ast.root) {
                 const match = sels.match(classNameRe);
                 match?.forEach(name => {
@@ -217,7 +216,7 @@ export async function filePathToClassnameDict(
                     const line = node.source.start?.line || 0;
 
                     const diff = node.selector.indexOf(name);
-                    const diffStr = node.selector.slice(0, diff)
+                    const diffStr = node.selector.slice(0, diff);
                     const lines = diffStr.split(os.EOL);
                     const lastLine = lines[lines.length - 1];
 
@@ -237,8 +236,8 @@ export async function filePathToClassnameDict(
                 }
 
                 const finishedSelectors: string[] = ([] as string[]).concat(
-                    ...knownParent.selectors.map(
-                        ps => selectors.map(
+                    ...knownParent.selectors.map(ps =>
+                        selectors.map(
                             /**
                              * No need to replace for children separated by spaces
                              *
@@ -252,27 +251,30 @@ export async function filePathToClassnameDict(
                              *      }
                              * }
                              */
-                            s => /&[a-z0-1-_]/i ? s.replace('&', ps) : s
-                        )
-                    )
+                            s => (/&[a-z0-1-_]/i ? s.replace('&', ps) : s),
+                        ),
+                    ),
                 );
 
-                const finishedSelectorsAndClassNames = finishedSelectors
-                    .map(finsihedSel => finsihedSel.match(classNameRe))
+                const finishedSelectorsAndClassNames = finishedSelectors.map(
+                    finsihedSel => finsihedSel.match(classNameRe),
+                );
 
-                finishedSelectorsAndClassNames.forEach(fscl => fscl?.forEach(classname => {
-                    if (classname in dict) return;
-                    if (node.source === undefined) return;
+                finishedSelectorsAndClassNames.forEach(fscl =>
+                    fscl?.forEach(classname => {
+                        if (classname in dict) return;
+                        if (node.source === undefined) return;
 
-                    const column = node.source.start?.column || 0;
-                    const line = node.source.start?.line || 0;
+                        const column = node.source.start?.column || 0;
+                        const line = node.source.start?.line || 0;
 
-                    // TODO: refine location to specific line by the classname's last characters
-                    dict[classnameTransformer(classname)] = {
-                        column: column,
-                        line: line,
-                    };
-                }));
+                        // TODO: refine location to specific line by the classname's last characters
+                        dict[classnameTransformer(classname)] = {
+                            column: column,
+                            line: line,
+                        };
+                    }),
+                );
 
                 visitedNodes.set(node, {selectors: finishedSelectors});
             }
@@ -292,7 +294,10 @@ export async function getAllClassNames(
     keyword: string,
     classnameTransformer: StringTransformer,
 ): Promise<string[]> {
-    const classes = await filePathToClassnameDict(filePath, classnameTransformer);
+    const classes = await filePathToClassnameDict(
+        filePath,
+        classnameTransformer,
+    );
     const classList = Object.keys(classes).map(x => x.slice(1));
 
     return keyword !== ''

@@ -4,7 +4,6 @@ import {
     Position,
     CompletionItem,
 } from 'vscode-languageserver-protocol';
-import _camelCase from 'lodash.camelcase';
 import {
     findImportPath,
     getAllClassNames,
@@ -61,7 +60,11 @@ export class CSSModulesCompletionProvider implements CompletionItemProvider {
             return [];
         }
 
-        const classNames = await getAllClassNames(importPath, field, this._classTransformer).catch(() => {
+        const classNames = await getAllClassNames(
+            importPath,
+            field,
+            this._classTransformer,
+        ).catch(() => {
             return [] as string[];
         });
 

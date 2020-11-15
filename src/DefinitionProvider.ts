@@ -1,7 +1,6 @@
 import path from 'path';
 import {workspace, Uri, DefinitionProvider} from 'coc.nvim';
 import {
-    CancellationToken,
     Location,
     Position,
     Range,
@@ -27,7 +26,6 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
     async provideDefinition(
         document: TextDocument,
         position: Position,
-        _: CancellationToken,
     ): Promise<Location | null> {
         const {nvim} = workspace;
 
@@ -39,7 +37,10 @@ export class CSSModulesDefinitionProvider implements DefinitionProvider {
         }
 
         const matches = genImportRegExp('(\\S+)').exec(currentLine);
-        if (matches && isImportLineMatch(currentLine, matches, position.character)) {
+        if (
+            matches &&
+            isImportLineMatch(currentLine, matches, position.character)
+        ) {
             const filePath: string = Uri.file(
                 path.resolve(currentDir, matches[2]),
             ).toString();
