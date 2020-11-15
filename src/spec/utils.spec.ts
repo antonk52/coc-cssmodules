@@ -1,281 +1,369 @@
-import {filePathToClassnameDict, findImportPath} from '../utils';
+import {filePathToClassnameDict, findImportPath, getTransformer} from '../utils';
 import * as path from 'path';
 
 describe('filePathToClassnameDict', () => {
-    it('gets a dictionory of classnames and their location', async () => {
-        const filepath = path.join(__dirname, 'styles', 'regular.css');
-        const result = await filePathToClassnameDict(filepath);
-        const expected = {
-            '.single': {
-                loc: {
-                    line: 1,
-                    column: 1,
-                }},
-            '.one': {loc: {
-                line: 5,
-                column: 1,
-            }},
-            '.two': {loc: {
-                line: 5,
-                column: 5,
-            }},
-            '.block--element__mod': {loc: {
-                line: 9,
-                column: 1,
-
-            }},
-            '.m-9': {loc: {
-                line: 13,
-                column: 1,
-            }},
-            ".💩": {
-                "loc": {
-                    "column": 1,
-                    "line": 17,
-                },
-            },
-            ".🔥🚒": {
-                "loc": {
-                    "column": 1,
-                    "line": 21,
-                },
-            },
-            ".🤢-_-😷": {
-                "loc": {
-                    "column": 1,
-                    "line": 25,
-                },
-            },
-        };
-
-        expect(result).toEqual(expected)
-    });
-
-    it('gets a dictionory of nested classnames', async () => {
-        const filepath = path.join(__dirname, 'styles', 'nested.css');
-        const result = await filePathToClassnameDict(filepath);
-        const expected = {
-            '.single': {
-                loc: {
-                    line: 1,
-                    column: 1,
-                }},
-            '.parent': {
-                loc: {
+    describe('CSS', () => {
+        it('gets a dictionory of classnames and their location', async () => {
+            const filepath = path.join(__dirname, 'styles', 'regular.css');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                '.single': {
+                    loc: {
+                        line: 1,
+                        column: 1,
+                    }},
+                '.one': {loc: {
                     line: 5,
                     column: 1,
                 }},
-            '.child': {
-                loc: {
-                line: 6,
-                // TODO: targets the first element from the selector
-                // instead of the actual classname
-                column: 5,
-            }},
-            '.parent--aa': {loc: {
-                line: 25,
-                column: 5,
-            }},
-            '.parent--bb': {loc: {
-                line: 25,
-                // TODO: same errro as for `.child`
-                column: 5,
-            }},
-            '.parent--mod': {loc: {
-                line: 10,
-                column: 5,
-            }},
-            '.parent--mod--addon': {loc: {
-                line: 13,
-                column: 9,
-            }},
-        };
+                '.two': {loc: {
+                    line: 5,
+                    column: 5,
+                }},
+                '.block--element__mod': {loc: {
+                    line: 9,
+                    column: 1,
 
-        expect(result).toEqual(expected)
-    });
-
-    it('gets a dictionory of nested classnames from less files', async () => {
-        const filepath = path.join(__dirname, 'styles', 'nested.less');
-        const result = await filePathToClassnameDict(filepath);
-        const expected = {
-            '.single': {
-                loc: {
-                    line: 10,
+                }},
+                '.m-9': {loc: {
+                    line: 13,
                     column: 1,
                 }},
-            ".button": {
-                "loc": {
-                    "column": 1,
-                    "line": 14,
+                ".💩": {
+                    "loc": {
+                        "column": 1,
+                        "line": 17,
+                    },
                 },
-            },
-            ".button-cancel": {
-                "loc": {
-                    "column": 5,
-                    "line": 18,
+                ".🔥🚒": {
+                    "loc": {
+                        "column": 1,
+                        "line": 21,
+                    },
                 },
-            },
-            ".button-custom": {
-                "loc": {
-                    "column": 5,
-                    "line": 22,
+                ".🤢-_-😷": {
+                    "loc": {
+                        "column": 1,
+                        "line": 25,
+                    },
                 },
-            },
-            ".button-ok": {
-                "loc": {
-                    "column": 5,
-                    "line": 15,
-                },
-            },
-            ".class": {
-                "loc": {
-                    "column": 1,
-                    "line": 52,
-                },
-            },
-            ".element": {
-                "loc": {
-                    "column": 5,
-                    "line": 74,
-                },
-            },
-            ".inner": {
-                "loc": {
-                    "column": 5,
-                    "line": 98,
-                },
-            },
-            ".inside-the-css-guard": {
-                "loc": {
-                    "column": 5,
-                    "line": 105,
-                },
-            },
-            ".link": {
-                "loc": {
-                    "column": 1,
-                    "line": 27,
-                },
-            },
-            ".linkish": {
-                "loc": {
-                    "column": 5,
-                    "line": 40,
-                },
-            },
-            ".math": {
-                "loc": {
-                    "column": 1,
-                    "line": 45,
-                },
-            },
-            ".mixin": {
-                "loc": {
-                    "column": 1,
-                    "line": 88,
-                },
-            },
-            ".my-optional-style": {
-                "loc": {
-                    "column": 1,
-                    "line": 104,
-                },
-            },
-            ".myclass": {
-                "loc": {
-                    "column": 1,
-                    "line": 91,
-                },
-            },
-            ".section": {
-                "loc": {
-                    "column": 1,
-                    "line": 71,
-                },
-            },
-        };
+            };
 
-        expect(result).toEqual(expected)
+            expect(result).toEqual(expected)
+        });
+
+        it('gets a dictionory of nested classnames', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.css');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                '.single': {
+                    loc: {
+                        line: 1,
+                        column: 1,
+                    }},
+                '.parent': {
+                    loc: {
+                        line: 5,
+                        column: 1,
+                    }},
+                '.child': {
+                    loc: {
+                        line: 6,
+                        // TODO: targets the first element from the selector
+                        // instead of the actual classname
+                        column: 5,
+                    }},
+                '.parent--aa': {loc: {
+                    line: 25,
+                    column: 5,
+                }},
+                '.parent--bb': {loc: {
+                    line: 25,
+                    // TODO: same errro as for `.child`
+                    column: 5,
+                }},
+                '.parent--mod': {loc: {
+                    line: 10,
+                    column: 5,
+                }},
+                '.parent--mod--addon': {loc: {
+                    line: 13,
+                    column: 9,
+                }},
+            };
+
+            expect(result).toEqual(expected)
+        });
     });
 
-    it('gets a dictionory of nested classnames from scss files', async () => {
-        const filepath = path.join(__dirname, 'styles', 'nested.scss');
-        const result = await filePathToClassnameDict(filepath);
-        const expected = {
-            ".accordion": {
-                "loc": {
-                    "column": 1,
-                    "line": 69,
+    describe('LESS', () => {
+        it('gets a dictionory of nested classnames from less files', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.less');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                '.single': {
+                    loc: {
+                        line: 10,
+                        column: 1,
+                    }},
+                ".button": {
+                    "loc": {
+                        "column": 1,
+                        "line": 14,
+                    },
                 },
-            },
-            ".accordion__copy": {
-                "loc": {
-                    "column": 5,
-                    "line": 76,
+                ".button-cancel": {
+                    "loc": {
+                        "column": 5,
+                        "line": 18,
+                    },
                 },
-            },
-            ".accordion__copy--open": {
-                "loc": {
-                    "column": 9,
-                    "line": 84,
+                ".button-custom": {
+                    "loc": {
+                        "column": 5,
+                        "line": 22,
+                    },
                 },
-            },
-            ".alert": {
-                "loc": {
-                    "column": 1,
-                    "line": 58,
+                ".button-ok": {
+                    "loc": {
+                        "column": 5,
+                        "line": 15,
+                    },
                 },
-            },
-            ".pulse": {
-                "loc": {
-                    "column": 1,
-                    "line": 46,
+                ".class": {
+                    "loc": {
+                        "column": 1,
+                        "line": 52,
+                    },
                 },
-            },
+                ".element": {
+                    "loc": {
+                        "column": 5,
+                        "line": 74,
+                    },
+                },
+                ".inner": {
+                    "loc": {
+                        "column": 5,
+                        "line": 98,
+                    },
+                },
+                ".inside-the-css-guard": {
+                    "loc": {
+                        "column": 5,
+                        "line": 105,
+                    },
+                },
+                ".link": {
+                    "loc": {
+                        "column": 1,
+                        "line": 27,
+                    },
+                },
+                ".linkish": {
+                    "loc": {
+                        "column": 5,
+                        "line": 40,
+                    },
+                },
+                ".math": {
+                    "loc": {
+                        "column": 1,
+                        "line": 45,
+                    },
+                },
+                ".mixin": {
+                    "loc": {
+                        "column": 1,
+                        "line": 88,
+                    },
+                },
+                ".my-optional-style": {
+                    "loc": {
+                        "column": 1,
+                        "line": 104,
+                    },
+                },
+                ".myclass": {
+                    "loc": {
+                        "column": 1,
+                        "line": 91,
+                    },
+                },
+                ".section": {
+                    "loc": {
+                        "column": 1,
+                        "line": 71,
+                    },
+                },
+            };
 
-        };
-
-        expect(result).toEqual(expected)
+            expect(result).toEqual(expected)
+        });
     });
 
-    it('gets a dictionory of nested classnames from sass files', async () => {
-        const filepath = path.join(__dirname, 'styles', 'nested.sass');
-        const result = await filePathToClassnameDict(filepath);
-        const expected = {
-            ".accordion": {
-                "loc": {
-                    "column": 1,
-                    "line": 55,
+    describe('SCSS', () => {
+        it('gets a dictionory of nested classnames for `false` setting', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.scss');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                ".accordion": {
+                    "loc": {
+                        "column": 1,
+                        "line": 69,
+                    },
                 },
-            },
-            ".accordion__copy": {
-                "loc": {
-                    "column": 5,
-                    "line": 62,
+                ".accordion__copy": {
+                    "loc": {
+                        "column": 5,
+                        "line": 76,
+                    },
                 },
-            },
-            ".accordion__copy--open": {
-                "loc": {
-                    "column": 9,
-                    "line": 70,
+                ".accordion__copy--open": {
+                    "loc": {
+                        "column": 9,
+                        "line": 84,
+                    },
                 },
-            },
-            ".alert": {
-                "loc": {
-                    "column": 1,
-                    "line": 48,
+                ".alert": {
+                    "loc": {
+                        "column": 1,
+                        "line": 58,
+                    },
                 },
-            },
-            ".pulse": {
-                "loc": {
-                    "column": 1,
-                    "line": 35,
+                ".pulse": {
+                    "loc": {
+                        "column": 1,
+                        "line": 46,
+                    },
                 },
-            },
 
-        };
+            };
 
-        expect(result).toEqual(expected)
+            expect(result).toEqual(expected)
+        });
+
+        it('gets a dictionory of nested classnames for `true` setting', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.scss');
+            const result = await filePathToClassnameDict(filepath, getTransformer(true));
+            const expected = {
+                ".accordion": {
+                    "loc": {
+                        "column": 1,
+                        "line": 69,
+                    },
+                },
+                ".accordionCopy": {
+                    "loc": {
+                        "column": 5,
+                        "line": 76,
+                    },
+                },
+                ".accordionCopyOpen": {
+                    "loc": {
+                        "column": 9,
+                        "line": 84,
+                    },
+                },
+                ".alert": {
+                    "loc": {
+                        "column": 1,
+                        "line": 58,
+                    },
+                },
+                ".pulse": {
+                    "loc": {
+                        "column": 1,
+                        "line": 46,
+                    },
+                },
+
+            };
+
+            expect(result).toEqual(expected)
+        });
+
+        it('gets a dictionory of nested classnames for `"dashes"` setting', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.scss');
+            const result = await filePathToClassnameDict(filepath, getTransformer("dashes"));
+            const expected = {
+                ".accordion": {
+                    "loc": {
+                        "column": 1,
+                        "line": 69,
+                    },
+                },
+                ".accordion__copy": {
+                    "loc": {
+                        "column": 5,
+                        "line": 76,
+                    },
+                },
+                ".accordion__copyOpen": {
+                    "loc": {
+                        "column": 9,
+                        "line": 84,
+                    },
+                },
+                ".alert": {
+                    "loc": {
+                        "column": 1,
+                        "line": 58,
+                    },
+                },
+                ".pulse": {
+                    "loc": {
+                        "column": 1,
+                        "line": 46,
+                    },
+                },
+
+            };
+
+            expect(result).toEqual(expected)
+        });
+    });
+
+    describe('SASS', () => {
+        it('gets a dictionory of nested classnames', async () => {
+            const filepath = path.join(__dirname, 'styles', 'nested.sass');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                ".accordion": {
+                    "loc": {
+                        "column": 1,
+                        "line": 55,
+                    },
+                },
+                ".accordion__copy": {
+                    "loc": {
+                        "column": 5,
+                        "line": 62,
+                    },
+                },
+                ".accordion__copy--open": {
+                    "loc": {
+                        "column": 9,
+                        "line": 70,
+                    },
+                },
+                ".alert": {
+                    "loc": {
+                        "column": 1,
+                        "line": 48,
+                    },
+                },
+                ".pulse": {
+                    "loc": {
+                        "column": 1,
+                        "line": 35,
+                    },
+                },
+
+            };
+
+            expect(result).toEqual(expected)
+        });
     });
 });
 

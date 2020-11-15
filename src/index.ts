@@ -25,7 +25,7 @@ export async function activate(context: ExtensionContext) {
         ),
     );
 
-    const langs = mode.map(x => x.language).filter(Boolean) as string[];
+    const langs = mode.map(x => x.language) as string[];
 
     context.subscriptions.push(
         languages.registerCompletionItemProvider(

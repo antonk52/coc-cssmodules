@@ -61,7 +61,7 @@ export class CSSModulesCompletionProvider implements CompletionItemProvider {
             return [];
         }
 
-        const classNames = await getAllClassNames(importPath, field).catch(() => {
+        const classNames = await getAllClassNames(importPath, field, this._classTransformer).catch(() => {
             return [] as string[];
         });
 
