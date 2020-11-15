@@ -17,7 +17,7 @@ export function getCurrentDirFromDocument(document: TextDocument) {
 export type CamelCaseValues = false | true | 'dashes';
 
 export function genImportRegExp(importName: string): RegExp {
-    const file = '(.+\\.(\\S{1,2}ss|styl(us)?))';
+    const file = '(.+\\.(css|scss|sass|styl))';
     const fromOrRequire = '(?:from\\s+|=\\s+require(?:<any>)?\\()';
     const requireEndOptional = '\\)?';
     const pattern = `${importName}\\s+${fromOrRequire}["']${file}["']${requireEndOptional}`;
@@ -27,10 +27,10 @@ export function genImportRegExp(importName: string): RegExp {
 
 export function findImportPath(
     fileContent: string,
-    key: string,
+    importName: string,
     directoryPath: string,
 ): string {
-    const re = genImportRegExp(key);
+    const re = genImportRegExp(importName);
     const results = re.exec(fileContent);
 
     if (!!results && results.length > 0) {
