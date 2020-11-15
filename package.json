@@ -1,6 +1,6 @@
 {
     "name": "coc-cssmodules",
-    "version": "1.0.0",
+    "version": "1.1.0-0",
     "description": "css modules autocompletion and go to definition coc.nvim plugin",
     "main": "lib/index.js",
     "scripts": {
