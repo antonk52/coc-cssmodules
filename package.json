@@ -7,8 +7,10 @@
         "clean": "rimraf lib",
         "watch": "webpack --watch",
         "watch:types": "tsc --noEmit --watch",
+        "types": "tsc --noEmit",
         "build": "webpack",
-        "prepare": "npm-run-all clean build"
+        "prepare": "npm-run-all clean build",
+        "test": "jest"
     },
     "keywords": [
         "coc.nvim",
