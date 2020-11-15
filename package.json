@@ -12,13 +12,35 @@
     },
     "keywords": [
         "coc.nvim",
-        "css-modules"
+        "css-modules",
+        "sass",
+        "scss",
+        "less"
     ],
     "files": [
         "lib/*"
     ],
     "engines": {
         "coc": ">= 0.0.70"
+    },
+    "configuration": {
+        "type": "object",
+        "title": "cssmodules",
+        "properties": {
+            "cssmodules.camelCase": {
+                "default": true,
+                "description": "Enable tsserver extension",
+                "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "string",
+                        "enum": ["dashes"]
+                    }
+                ]
+            }
+        }
     },
     "author": "antonk52",
     "repository": {

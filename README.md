@@ -4,6 +4,8 @@
 
 <p align="center"><img src="https://user-images.githubusercontent.com/5817809/76164832-0adaf600-6163-11ea-8c8e-548b7aeb1213.gif"></p>
 
+The supported languages are `css`(postcss), `sass` and `scss`. `styl` files are parsed as regular `css`.
+
 ## Installation
 
 ```
