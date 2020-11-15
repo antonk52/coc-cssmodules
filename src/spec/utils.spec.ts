@@ -83,6 +83,38 @@ describe('filePathToClassnameDict', () => {
 
             expect(result).toEqual(expected)
         });
+
+        // TODO
+        it.skip('multiple nested classnames in a single selector', async () => {
+            const filepath = path.join(__dirname, 'styles', 'second-nested-selector.css');
+            const result = await filePathToClassnameDict(filepath, getTransformer(false));
+            const expected = {
+                '.parent': {
+                    line: 1,
+                    column: 1,
+                },
+                '.child': {
+                    line: 2,
+                    // TODO: targets the first element from the selector
+                    // instead of the actual classname
+                    column: 5,
+                },
+                '.parent--alt': {
+                    line: 7,
+                    column: 5,
+                },
+                '.parent--mod': {
+                    line: 6,
+                    column: 5,
+                },
+                '.parent--mod--addon': {
+                    line: 16,
+                    column: 9,
+                },
+            };
+
+            expect(result).toEqual(expected)
+        });
     });
 
     describe('LESS', () => {

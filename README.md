@@ -24,7 +24,7 @@ If you write kebab-case classes in css files, but want to get camelCase complete
 }
 ```
 
-### Options and transoformation
+### Options and transformation
 
 You can set the `cssmodules.camelCase` option to `true`, `"dashes"` or `false`(default).
 
