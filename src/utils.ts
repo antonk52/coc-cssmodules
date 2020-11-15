@@ -7,9 +7,6 @@ import _camelCase from 'lodash.camelcase';
 import postcss from 'postcss';
 import type {Node, Parser, ProcessOptions} from 'postcss';
 
-/**
- * TODO find better way to get a file path not starting with `file:///`
- */
 export function getCurrentDirFromDocument(document: TextDocument) {
     return path.dirname(document.uri).replace(/^file:\/\//, '');
 }
@@ -98,7 +95,7 @@ export async function getPosition(
     const target = classDict[`.${className}`];
 
     return target
-        ? Position.create(target.loc.line - 1, target.loc.column)
+        ? Position.create(target.line - 1, target.column)
         : null;
 }
 
@@ -119,10 +116,8 @@ export function getWords(line: string, position: Position): string {
 }
 
 type Classname = {
-    loc: {
-        line: number,
-        column: number,
-    },
+    line: number,
+    column: number,
 };
 
 export const log = (...args: any[]) => {
@@ -154,16 +149,12 @@ const PostcssInst = postcss([]);
  * ```
  * {
  *     '.foo': {
- *         loc: {
- *             line: 10,
- *             column: 5,
- *         }
+ *         line: 10,
+ *         column: 5,
  *     },
  *     '.bar': {
- *         loc: {
- *             line: 22,
- *             column: 1,
- *         }
+ *         line: 22,
+ *         column: 1,
  *     }
  * }
  * ```
@@ -231,11 +222,9 @@ export async function filePathToClassnameDict(
                     const lastLine = lines[lines.length - 1];
 
                     dict[classnameTransformer(name)] = {
-                        loc: {
-                            column: column + lastLine.length,
-                            line: line + lines.length - 1,
-                        }
-                    }
+                        column: column + lastLine.length,
+                        line: line + lines.length - 1,
+                    };
                 });
 
                 visitedNodes.set(node, {selectors});
@@ -278,12 +267,10 @@ export async function filePathToClassnameDict(
                     const column = node.source.start?.column || 0;
                     const line = node.source.start?.line || 0;
 
-                    // TODO: refine location to specific line by the classname's last characteds
+                    // TODO: refine location to specific line by the classname's last characters
                     dict[classnameTransformer(classname)] = {
-                        loc: {
-                            column: column,
-                            line: line,
-                        },
+                        column: column,
+                        line: line,
                     };
                 }));
 
