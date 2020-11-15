@@ -10,8 +10,9 @@
         "types": "tsc --noEmit",
         "lint": "eslint . --ext=.js,.ts",
         "build": "webpack",
-        "prepare": "npm-run-all clean build",
-        "test": "jest"
+        "test": "jest",
+        "preversion": "npm-run-all clean build lint types test",
+        "postversion": "npm publish && git push --follow-tags"
     },
     "keywords": [
         "coc.nvim",
