@@ -1,4 +1,4 @@
-import {filePathToClassnameDict} from '../utils';
+import {filePathToClassnameDict, findImportPath} from '../utils';
 import * as path from 'path';
 
 describe('filePathToClassnameDict', () => {
@@ -276,5 +276,73 @@ describe('filePathToClassnameDict', () => {
         };
 
         expect(result).toEqual(expected)
+    });
+});
+
+const fileContent = `
+import React from 'react'
+
+import css from './style.css'
+import style from './style.css'
+import styles from './styles.css'
+import lCss from './styles.less'
+import sCss from './styles.scss'
+import sass from './styles.sass'
+import styl from './styles.styl'
+
+const rCss = require('./style.css')
+const rStyle = require('./style.css')
+const rStyles = require('./styles.css')
+const rLCss = require('./styles.less')
+const rSCss = require('./styles.scss')
+const rSass = require('./styles.sass')
+const rStyl = require('./styles.styl')
+`.trim();
+
+describe('findImportPath', () => {
+    const dirPath = '/User/me/project/Component';
+
+    [
+        ['css', path.join(dirPath, 'style.css')],
+        ['style', path.join(dirPath, 'style.css')],
+        ['styles', path.join(dirPath, 'styles.css')],
+        ['lCss', path.join(dirPath, 'styles.less')],
+        ['sCss', path.join(dirPath, 'styles.scss')],
+        ['sass', path.join(dirPath, 'styles.sass')],
+        ['styl', path.join(dirPath, 'styles.styl')],
+
+        ['rCss', path.join(dirPath, './style.css')],
+        ['rStyle', path.join(dirPath, './style.css')],
+        ['rStyles', path.join(dirPath, './styles.css')],
+        ['rLCss', path.join(dirPath, './styles.less')],
+        ['rSCss', path.join(dirPath, './styles.scss')],
+        ['rSass', path.join(dirPath, './styles.sass')],
+        ['rStyl', path.join(dirPath, './styles.styl')],
+    ].forEach(([importName, expected]) => it(
+        `finds the correct import path for ${importName}`,
+        () => {
+            const result = findImportPath(
+                fileContent,
+                importName,
+                dirPath,
+            );
+            expect(result).toBe(expected);
+        }
+    ));
+
+    it('returns an empty string when there is no import', () => {
+        const simpleComponentFile = [
+            'import React from \'react\'',
+            'export () => <h1>hello world</h1>'
+        ].join('\n');
+
+        const result = findImportPath(
+            simpleComponentFile,
+            'css',
+            dirPath,
+        );
+        const expected = '';
+
+        expect(result).toEqual(expected);
     });
 });
