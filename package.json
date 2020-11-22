@@ -34,7 +34,7 @@
             "properties": {
                 "cssmodules.camelCase": {
                     "default": false,
-                    "description": "Enable tsserver extension",
+                    "description": "How the classnames should get transformed when hinted",
                     "oneOf": [
                         {
                             "type": "boolean"
@@ -46,6 +46,11 @@
                             ]
                         }
                     ]
+                },
+                "cssmodules.hintName": {
+                    "default": "cssmodules",
+                    "description": "The name displayed next to autocompletion options, default is `cssmodules`",
+                    "type": "string"
                 }
             }
         }
