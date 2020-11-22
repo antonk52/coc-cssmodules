@@ -27,24 +27,26 @@
     "engines": {
         "coc": ">= 0.0.70"
     },
-    "configuration": {
-        "type": "object",
-        "title": "cssmodules",
-        "properties": {
-            "cssmodules.camelCase": {
-                "default": false,
-                "description": "Enable tsserver extension",
-                "oneOf": [
-                    {
-                        "type": "boolean"
-                    },
-                    {
-                        "type": "string",
-                        "enum": [
-                            "dashes"
-                        ]
-                    }
-                ]
+    "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "cssmodules",
+            "properties": {
+                "cssmodules.camelCase": {
+                    "default": false,
+                    "description": "Enable tsserver extension",
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string",
+                            "enum": [
+                                "dashes"
+                            ]
+                        }
+                    ]
+                }
             }
         }
     },
