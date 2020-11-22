@@ -20,6 +20,7 @@ export async function activate(context: ExtensionContext) {
         'camelCase',
         false,
     );
+    const hintName: string = configuration.get('hintName', extName);
 
     context.subscriptions.push(
         languages.registerDefinitionProvider(
@@ -33,7 +34,7 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
         languages.registerCompletionItemProvider(
             'coc-cssmodules',
-            'cssmodules',
+            hintName,
             langs,
             new CSSModulesCompletionProvider(camelCaseConfig),
             ['.'],

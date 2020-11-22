@@ -405,3 +405,56 @@ describe('findImportPath', () => {
         expect(result).toEqual(expected);
     });
 });
+
+describe('getTransformer', () => {
+    describe('for `true` setting', () => {
+        const transformer = getTransformer(true);
+        it('classic BEM classnames get camelified', () => {
+            const input = '.el__block--mod';
+            const result = transformer(input);
+            const expected = '.elBlockMod';
+
+            expect(result).toEqual(expected);
+        });
+        it('emojis stay the same', () => {
+            const input = '.✌️';
+            const result = transformer(input);
+            const expected = '.✌️';
+
+            expect(result).toEqual(expected);
+        });
+    });
+    describe('for `dashes` setting', () => {
+        const transformer = getTransformer('dashes');
+        it('only dashes in BEM classnames get camelified', () => {
+            const input = '.el__block--mod';
+            const result = transformer(input);
+            const expected = '.el__blockMod';
+
+            expect(result).toEqual(expected);
+        });
+        it('emojis stay the same', () => {
+            const input = '.✌️';
+            const result = transformer(input);
+            const expected = '.✌️';
+
+            expect(result).toEqual(expected);
+        });
+    });
+    describe('for `false` setting', () => {
+        const transformer = getTransformer(false);
+
+        it('classic BEM classnames get camelified', () => {
+            const input = '.el__block--mod';
+            const result = transformer(input);
+
+            expect(result).toEqual(input);
+        });
+        it('emojis stay the same', () => {
+            const input = '.✌️';
+            const result = transformer(input);
+
+            expect(result).toEqual(input);
+        });
+    });
+});

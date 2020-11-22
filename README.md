@@ -28,10 +28,25 @@ If you write kebab-case classes in css files, but want to get camelCase complete
 
 You can set the `cssmodules.camelCase` option to `true`, `"dashes"` or `false`(default).
 
-| Classname in css file | `true`            | `dashes`        | `false`(default) |
-| --------------------- | ----------------- | --------------- | ---------------- |
-| `.button`             | `.button`         | `.button`       | `.button`        |
-| `.btn__icon--mod`     | `.btn__icon--mod` | `.btn__iconMod` | `.btnIconMod`    |
+| Classname in css file | `true`            | `dashes`        | `false`(default)  |
+| --------------------- | ----------------- | --------------- | ----------------- |
+| `.button`             | `.button`         | `.button`       | `.button`         |
+| `.btn__icon--mod`     | `.btnIconMod`     | `.btn__iconMod` | `.btn__icon--mod` |
+
+
+### hintName setting
+
+You can change the hint name by setting it in the `coc-setting.json` file. Default is `cssmodules`
+
+example
+
+```json
+{
+   "cssmodules.hintName": "cssmodules"
+}
+```
+
+<p align="center"><img src="https://user-images.githubusercontent.com/5817809/99907239-bc6b8880-2cec-11eb-87ab-9c51730340ab.png"></p>
 
 ## Acknowledgments
 
