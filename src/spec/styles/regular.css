@@ -25,3 +25,9 @@
 .🤢-_-😷 {
     color: lime;
 }
+
+@media (min-width: 320px) {
+    .inMedia {
+        color: hotpink;
+    }
+}
