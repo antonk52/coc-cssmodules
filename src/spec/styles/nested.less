@@ -107,3 +107,25 @@ nav ul {
     }
 }
 .my-optional-style();
+
+@media (min-width: 320px) {
+    .inMedia {
+        color: hotpink;
+
+        &__mod {
+            color: yellow;
+        }
+    }
+}
+
+.container {
+    @media (min-width: 320px) {
+        .withinMedia {
+            color: hotpink;
+
+            &__mod {
+                color: yellow;
+            }
+        }
+    }
+}

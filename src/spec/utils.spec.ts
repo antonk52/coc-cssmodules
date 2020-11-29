@@ -46,6 +46,10 @@ describe('filePathToClassnameDict', () => {
                     column: 1,
                     line: 25,
                 },
+                '.inMedia': {
+                    column: 5,
+                    line: 30,
+                },
             };
 
             expect(result).toEqual(expected);
@@ -87,6 +91,14 @@ describe('filePathToClassnameDict', () => {
                 },
                 '.parent--mod--addon': {
                     line: 13,
+                    column: 9,
+                },
+                '.inMedia': {
+                    line: 32,
+                    column: 5,
+                },
+                '.inMedia__mod': {
+                    line: 35,
                     column: 9,
                 },
             };
@@ -166,6 +178,10 @@ describe('filePathToClassnameDict', () => {
                     column: 1,
                     line: 52,
                 },
+                '.container': {
+                    column: 1,
+                    line: 121,
+                },
                 '.element': {
                     column: 5,
                     line: 74,
@@ -206,6 +222,22 @@ describe('filePathToClassnameDict', () => {
                     column: 1,
                     line: 71,
                 },
+                '.inMedia': {
+                    column: 5,
+                    line: 112,
+                },
+                '.inMedia__mod': {
+                    column: 9,
+                    line: 115,
+                },
+                '.withinMedia': {
+                    column: 9,
+                    line: 123,
+                },
+                '.withinMedia__mod': {
+                    column: 13,
+                    line: 126,
+                },
             };
 
             expect(result).toEqual(expected);
@@ -232,6 +264,14 @@ describe('filePathToClassnameDict', () => {
                     column: 9,
                     line: 84,
                 },
+                '.accordion__sm': {
+                    column: 9,
+                    line: 90,
+                },
+                '.accordion__sm--shrink': {
+                    column: 13,
+                    line: 93,
+                },
                 '.alert': {
                     column: 1,
                     line: 58,
@@ -239,6 +279,14 @@ describe('filePathToClassnameDict', () => {
                 '.pulse': {
                     column: 1,
                     line: 46,
+                },
+                '.inMedia': {
+                    column: 5,
+                    line: 101,
+                },
+                '.inMedia__mod': {
+                    column: 9,
+                    line: 104,
                 },
             };
 
@@ -264,6 +312,14 @@ describe('filePathToClassnameDict', () => {
                     column: 9,
                     line: 84,
                 },
+                '.accordionSm': {
+                    column: 9,
+                    line: 90,
+                },
+                '.accordionSmShrink': {
+                    column: 13,
+                    line: 93,
+                },
                 '.alert': {
                     column: 1,
                     line: 58,
@@ -271,6 +327,14 @@ describe('filePathToClassnameDict', () => {
                 '.pulse': {
                     column: 1,
                     line: 46,
+                },
+                '.inMedia': {
+                    column: 5,
+                    line: 101,
+                },
+                '.inMediaMod': {
+                    column: 9,
+                    line: 104,
                 },
             };
 
@@ -296,6 +360,14 @@ describe('filePathToClassnameDict', () => {
                     column: 9,
                     line: 84,
                 },
+                '.accordion__sm': {
+                    column: 9,
+                    line: 90,
+                },
+                '.accordion__smShrink': {
+                    column: 13,
+                    line: 93,
+                },
                 '.alert': {
                     column: 1,
                     line: 58,
@@ -303,6 +375,14 @@ describe('filePathToClassnameDict', () => {
                 '.pulse': {
                     column: 1,
                     line: 46,
+                },
+                '.inMedia': {
+                    column: 5,
+                    line: 101,
+                },
+                '.inMedia__mod': {
+                    column: 9,
+                    line: 104,
                 },
             };
 
@@ -337,6 +417,14 @@ describe('filePathToClassnameDict', () => {
                 '.pulse': {
                     column: 1,
                     line: 35,
+                },
+                '.inMedia': {
+                    column: 5,
+                    line: 74,
+                },
+                '.inMedia__mod': {
+                    column: 9,
+                    line: 77,
                 },
             };
 

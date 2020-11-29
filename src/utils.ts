@@ -142,6 +142,43 @@ type LazyLoadPostcssParser = () => Parser;
 
 const PostcssInst = postcss([]);
 
+const concatSelectors = (
+    parentSelectors: string[],
+    nodeSelectors: string[],
+): string[] => {
+    // if parent is AtRule
+    if (parentSelectors.length === 0) return nodeSelectors;
+
+    return ([] as string[]).concat(
+        ...parentSelectors.map(ps =>
+            nodeSelectors.map(
+                /**
+                 * No need to replace for children separated by spaces
+                 *
+                 * .parent {
+                 *      color: red;
+                 *
+                 *      & .child {
+                 *      ^^^^^^^^ no need to do the replace here,
+                 *               since no new classnames are created
+                 *          color: pink;
+                 *      }
+                 * }
+                 */
+                s => (/&[a-z0-1-_]/i ? s.replace('&', ps) : s),
+            ),
+        ),
+    );
+};
+
+function getParentRule(node: Node): undefined | Node {
+    const {parent} = node;
+    if (!parent) return undefined;
+    if (parent.type === 'rule') return parent;
+
+    return getParentRule(parent);
+}
+
 /**
  * input `'./path/to/styles.css'`
  *
@@ -199,6 +236,10 @@ export async function filePathToClassnameDict(
 
     while (stack.length) {
         const node = stack.shift();
+        if (node?.type === 'atrule' && node.name.toLowerCase() === 'media') {
+            stack.unshift(...node.nodes);
+            continue;
+        }
         if (node?.type !== 'rule') continue;
 
         const selectors = node.selector.split(',').map(sanitizeSelector);
@@ -230,31 +271,12 @@ export async function filePathToClassnameDict(
             } else {
                 if (node.parent === undefined) return;
 
-                const knownParent = visitedNodes.get(node.parent);
-                if (!knownParent) {
-                    return;
-                }
+                const parent = getParentRule(node);
+                const knownParent = parent && visitedNodes.get(parent);
 
-                const finishedSelectors: string[] = ([] as string[]).concat(
-                    ...knownParent.selectors.map(ps =>
-                        selectors.map(
-                            /**
-                             * No need to replace for children separated by spaces
-                             *
-                             * .parent {
-                             *      color: red;
-                             *
-                             *      & .child {
-                             *      ^^^^^^^^ no need to do the replace here,
-                             *               since no new classnames are created
-                             *          color: pink;
-                             *      }
-                             * }
-                             */
-                            s => (/&[a-z0-1-_]/i ? s.replace('&', ps) : s),
-                        ),
-                    ),
-                );
+                const finishedSelectors: string[] = knownParent
+                    ? concatSelectors(knownParent.selectors, selectors)
+                    : selectors;
 
                 const finishedSelectorsAndClassNames = finishedSelectors.map(
                     finsihedSel => finsihedSel.match(classNameRe),

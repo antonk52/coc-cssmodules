@@ -85,5 +85,24 @@ $border-dark: rgba($base-color, 0.88);
             display: block;
         }
     }
+
+    @media (min-width: 320px) {
+        &__sm {
+            width: 100%;
+
+            &--shrink {
+                width: 80%;
+            }
+        }
+    }
 }
 
+@media (min-width: 320px) {
+    .inMedia {
+        color: hotpink;
+
+        &__mod {
+            color: yellow;
+        }
+    }
+}
