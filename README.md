@@ -1,5 +1,10 @@
 # coc-cssmodules
 
+> [!CAUTION]
+> This package is deprecated, archived, and unsupported.
+>
+> You should look into [cssmodules-language-server](https://github.com/antonk52/cssmodules-language-server) with more features and better neovim support via nvim-lspconfig.
+
 [coc.nvim](https://github.com/neoclide/coc.nvim) plugin for `autocompletion` and `go-to-definition` functionality for css modules.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/5817809/76164832-0adaf600-6163-11ea-8c8e-548b7aeb1213.gif"></p>
